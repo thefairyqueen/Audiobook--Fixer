@@ -1,4 +1,4 @@
-    import streamlit as st
+import streamlit as st
 import numpy as np
 import soundfile as sf
 import noisereduce as nr
@@ -120,4 +120,5 @@ if uploaded_files:
             file_name=name,
             mime="audio/mpeg"
         )
+
 
