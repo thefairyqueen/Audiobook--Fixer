@@ -1,9 +1,9 @@
 import streamlit as st
 import numpy as np
-import noisereduce as nr
+import io
 from pydub import AudioSegment
 from pydub.utils import make_chunks
-import io
+import noisereduce as nr
 
 # Page config
 st.set_page_config(
@@ -15,7 +15,7 @@ st.set_page_config(
 st.title("🎧 Audiobook Fixer")
 st.write("""
 Upload your MP3 chapters, and this app will:
-- Remove background noise (choose Mild or Strong)
+- Remove background noise (Mild or Strong)
 - Normalize RMS to -21 dB (ACX standard)
 - Add 3 seconds of silence at the start and 4 seconds at the end
 - Return ACX-compliant MP3s ready for upload!
@@ -32,8 +32,39 @@ uploaded_files = st.file_uploader(
 
 def normalize_rms(audio: np.ndarray, target_db=-21.0) -> np.ndarray:
     """Normalize RMS per channel to target dB"""
-    rms = 20 * np.log10(np.sqrt(np.mean(audio ** 2) + 1e-9))  # avoid log(0)
+    rms = 20 * np.log10(np.sqrt(np.mean(audio ** 2) + 1e-8))
     gain = 10 ** ((target_db - rms) / 20)
+    return audio * gain
+
+if uploaded_files:
+    st.info(f"Processing {len(uploaded_files)} file(s)... Please wait ⏳")
+    progress_bar = st.progress(0)
+    total = len(uploaded_files)
+    processed_files = []
+
+    for idx, file in enumerate(uploaded_files, start=1):
+        with st.spinner(f"Processing {file.name}..."):
+            audio = AudioSegment.from_file(file, format="mp3")
+            chunk_length_ms = 30000
+            chunks = make_chunks(audio, chunk_length_ms)
+
+            processed_audio = AudioSegment.silent(duration=3000, frame_rate=44100)
+            prop = 0.5 if nr_level == "Mild" else 1.0
+
+            for chunk in chunks:
+                samples = np.array(chunk.get_array_of_samples()).astype(np.float32)
+                if chunk.channels == 2:
+                    samples = samples.reshape((-1, 2)).T
+                else:
+                    samples = samples[np.newaxis, :]
+
+                processed_channels = []
+                for channel in samples:
+                    channel_nr = nr.reduce_noise(
+                        y=channel, 
+                        sr=chunk.frame_rate, 
+                        prop_decrease=prop, 
+                        stat
     return audio * gain
 
 if uploaded_files:
@@ -219,4 +250,5 @@ if uploaded_files:
             file_name=name,
             mime="audio/mpeg"
         )
+
 
