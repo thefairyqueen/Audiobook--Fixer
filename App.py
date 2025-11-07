@@ -126,8 +126,7 @@ if uploaded_files:
             label=f"⬇️ Download {name}",
             data=audio_data,
             file_name=name,
-            mime="audio/mp3"
-        )
+            mime="audio/mp3")
             data=audio_data,
             file_name=name,
             mime="audio/mp3")
@@ -338,6 +337,7 @@ if uploaded_files:
             data=audio_data,
             file_name=name,
             mime="audio/mpeg")
+
 
 
 
