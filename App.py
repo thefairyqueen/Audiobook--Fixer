@@ -9,8 +9,7 @@ import io
 st.set_page_config(
     page_title="Audiobook Fixer 🎧",
     page_icon="🎶",
-    layout="centered"
-)
+    layout="centered")
 
 st.title("🎧 Audiobook Fixer")
 st.write("""
@@ -27,8 +26,7 @@ nr_level = st.radio("Noise reduction level:", ["Mild", "Strong"])
 uploaded_files = st.file_uploader(
     "Upload one or more MP3 files",
     type=["mp3"],
-    accept_multiple_files=True
-)
+    accept_multiple_files=True)
 
 def normalize_rms(audio: np.ndarray, target_db=-21.0) -> np.ndarray:
     """Normalize RMS per channel to target dB"""
@@ -74,8 +72,7 @@ if uploaded_files:
                         y=channel,
                         sr=chunk.frame_rate,
                         prop_decrease=prop,
-                        stationary=False
-                    )
+                        stationary=False)
                     channel_nr = normalize_rms(channel_nr, target_db=-21.0)
                     processed_channels.append(channel_nr)
 
@@ -91,7 +88,6 @@ if uploaded_files:
                     frame_rate=44100,
                     sample_width=2,
                     channels=len(processed_channels)
-                )
                 processed_audio += processed_segment
 
             # Add 4s silence at the end
@@ -123,8 +119,7 @@ if uploaded_files:
             label=f"⬇️ Download {name}",
             data=audio_data,
             file_name=name,
-            mime="audio/mp3"
-        )
+            mime="audio/mp3")
     return audio * gain
 
 if uploaded_files:
@@ -192,17 +187,14 @@ if uploaded_files:
                 processed_channels = []
                 for channel in samples:
                     channel_nr = nr.reduce_noise(
-                        y=channel, sr=chunk.frame_rate, prop_decrease=prop, stationary=False
-                    )
+                        y=channel, sr=chunk.frame_rate, prop_decrease=prop, stationary=False)
                     channel_nr = normalize_rms(channel_nr, target_db=-21.0)
                     processed_channels.append(channel_nr)
 
                 # Recombine channels
-                processed_chunk = (
-                    np.vstack(processed_channels).T
+                processed_chunk = (np.vstack(processed_channels).T
                     if len(processed_channels) > 1
-                    else processed_channels[0]
-                )
+                    else processed_channels[0])
 
                 # Convert back to AudioSegment (ACX standard: 16-bit, 44.1 kHz)
                 processed_segment = AudioSegment(
@@ -210,7 +202,6 @@ if uploaded_files:
                     frame_rate=44100,
                     sample_width=2,  # 16-bit PCM
                     channels=len(processed_channels)
-                )
                 processed_audio += processed_segment
 
             # Add 4s silence at the end
@@ -243,8 +234,7 @@ if uploaded_files:
             label=f"⬇️ Download {name}",
             data=audio_data,
             file_name=name,
-            mime="audio/mpeg"
-        )
+            mime="audio/mpeg")
 
 def normalize_rms(audio: np.ndarray, target_db=-21.0) -> np.ndarray:
     """Normalize RMS per channel to target dB"""
@@ -289,8 +279,7 @@ if uploaded_files:
                         y=channel,
                         sr=chunk.frame_rate,
                         prop_decrease=prop,
-                        stationary=False
-                    )
+                        stationary=False)
                     channel_nr = normalize_rms(channel_nr, target_db=-21.0)
                     processed_channels.append(channel_nr)
 
@@ -298,8 +287,7 @@ if uploaded_files:
                 processed_chunk = (
                     np.vstack(processed_channels).T
                     if len(processed_channels) > 1
-                    else processed_channels[0]
-                )
+                    else processed_channels[0])
 
                 # Convert back to AudioSegment (ACX standard: 16-bit, 44.1 kHz)
                 processed_segment = AudioSegment(
@@ -307,7 +295,6 @@ if uploaded_files:
                     frame_rate=44100,
                     sample_width=2,
                     channels=len(processed_channels)
-                )
                 processed_audio += processed_segment
 
             # Add 4s silence at the end
@@ -339,8 +326,8 @@ if uploaded_files:
             label=f"⬇️ Download {name}",
             data=audio_data,
             file_name=name,
-            mime="audio/mpeg"
-        )
+            mime="audio/mpeg")
+
 
 
 
