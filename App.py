@@ -69,6 +69,41 @@ if uploaded_files:
     st.success("✅ All files processed!")
     for name, audio_data in processed_files:
         st.download_button(label=f"⬇️ Download {name}", data=audio_data)
+        with st.spinner(f"Processing {file.name}..."):
+            audio = AudioSegment.from_file(file, format="mp3")
+            chunks = make_chunks(audio, 30000)
+            processed_audio = AudioSegment.silent(duration=3000, frame_rate=44100)
+            prop = 0.5 if nr_level == "Mild" else 1.0
+
+            for chunk in chunks:
+                samples = np.array(chunk.get_array_of_samples()).astype(np.float32)
+                samples = samples.reshape((-1, 2)).T if chunk.channels == 2 else samples[np.newaxis, :]
+                processed_channels = []
+                for channel in samples:
+                    channel_nr = nr.reduce_noise(y=channel, sr=chunk.frame_rate, prop_decrease=prop, stationary=False)
+                    channel_nr = normalize_rms(channel_nr, target_db=-21.0)
+                    processed_channels.append(channel_nr)
+                processed_chunk = np.vstack(processed_channels).T if len(processed_channels) > 1 else processed_channels[0]
+                processed_segment = AudioSegment(processed_chunk.astype(np.int16).tobytes(), frame_rate=44100, sample_width=2, channels=len(processed_channels))
+                processed_audio += processed_segment
+
+            processed_audio += AudioSegment.silent(duration=4000, frame_rate=44100)
+            tmp_mp3 = io.BytesIO()
+            processed_audio.export(tmp_mp3, format="mp3", bitrate="192k")
+            tmp_mp3.seek(0)
+            mp3_name = file.name.replace(".mp3", "_processed.mp3")
+            processed_files.append((mp3_name, tmp_mp3))
+
+            preview_segment = processed_audio[:10000]
+            tmp_preview = io.BytesIO()
+            preview_segment.export(tmp_preview, format="mp3", bitrate="192k")
+            tmp_preview.seek(0)
+            st.audio(tmp_preview, format="audio/mp3", start_time=0, caption=f"Preview: {file.name}")
+            progress_bar.progress(idx / total)
+
+    st.success("✅ All files processed!")
+    for name, audio_data in processed_files:
+        st.download_button(label=f"⬇️ Download {name}", data=audio_data)
 if uploaded_files:
     st.info(f"Processing {len(uploaded_files)} file(s)... Please wait ⏳")
     progress_bar = st.progress(0)
@@ -362,6 +397,7 @@ if uploaded_files:
             data=audio_data,
             file_name=name,
             mime="audio/mpeg")
+
 
 
 
