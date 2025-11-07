@@ -1,10 +1,7 @@
 streamlit==1.51.0
 numpy==2.3.4
 pandas==2.3.3
-pydub==0.25.1
-noisereduce==3.0.3
-scipy==1.16.3
 soundfile==0.13.1
-requests==2.32.5
-matplotlib==3.10.7
-joblib==1.5.2
+noisereduce==3.0.3
+pydub==0.25.1
+librosa==0.10.3  
