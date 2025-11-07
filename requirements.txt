@@ -3,4 +3,4 @@ numpy
 pydub
 soundfile
 noisereduce
-pyaudioop==0.2.0
+scipy
