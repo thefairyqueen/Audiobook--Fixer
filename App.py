@@ -1,39 +1,64 @@
 import streamlit as st
-import numpy as np
-import soundfile as sf
-import noisereduce as nr
-import math
 import io
-from pydub import AudioSegment
-from pydub.utils import make_chunks
+import math
+import requests
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Optional noise reduction
+try:
+    import noisereduce as nr
+except ImportError:
+    nr = None
+    st.warning("noisereduce not installed, noise reduction will be disabled.")
+
+# Audio handling with safe fallback
+try:
+    from pydub import AudioSegment
+    from pydub.utils import make_chunks
+except ImportError:
+    AudioSegment = None
+    make_chunks = None
+    st.error("pydub not installed, audio features will not work.")
 
 # Page config
-st.set_page_config(
-    page_title="Audiobook Fixer 🎧",
-    page_icon="🎶",
-    layout="centered"
-)
+st.set_page_config(page_title="Audiobook Fixer", layout="wide")
 
-st.title("🎧 Audiobook Fixer")
-st.write("""
-Upload your MP3 chapters, and this app will:
-- Remove background noise (choose Mild or Strong)
-- Normalize RMS to -21 dB (ACX standard)
-- Add 3 seconds of silence at the start and 4 seconds at the end
-- Return ACX-compliant MP3s ready for upload!
-- Preview the first 10 seconds before downloading
-""")
+st.title("Audiobook Fixer 🎧")
 
-# User inputs
-nr_level = st.radio("Noise reduction level:", ["Mild", "Strong"])
-uploaded_files = st.file_uploader(
-    "Upload one or more MP3 files",
-    type=["mp3"],
-    accept_multiple_files=True
-)
+# Upload audio
+uploaded_file = st.file_uploader("Upload your audio file", type=["mp3", "wav", "ogg"])
 
-def normalize_rms(audio: np.ndarray, target_db=-21.0) -> np.ndarray:
-    """Normalize RMS per channel to target dB"""
+if uploaded_file and AudioSegment:
+    try:
+        audio = AudioSegment.from_file(io.BytesIO(uploaded_file.read()))
+        st.audio(uploaded_file, format='audio/wav')
+        
+        st.success(f"Loaded audio: {len(audio)}ms long.")
+
+        # Example: Split into chunks
+        chunk_length_ms = 30000  # 30 sec
+        chunks = make_chunks(audio, chunk_length_ms)
+
+        st.write(f"Split audio into {len(chunks)} chunks.")
+
+        # Optional: visualize waveform (requires numpy & matplotlib)
+        samples = np.array(audio.get_array_of_samples())
+        plt.figure(figsize=(10, 3))
+        plt.plot(samples)
+        plt.title("Waveform")
+        plt.xlabel("Sample")
+        plt.ylabel("Amplitude")
+        st.pyplot(plt)
+        
+    except Exception as e:
+        st.error(f"Failed to process audio: {e}")
+
+else:
+    if not AudioSegment:
+        st.warning("Audio functionality disabled due to missing pydub.")
+    st.info("Upload an audio file to get started.")
     rms = 20 * np.log10(np.sqrt(np.mean(audio ** 2)))
     gain = 10 ** ((target_db - rms) / 20)
     return audio * gain
@@ -120,5 +145,6 @@ if uploaded_files:
             file_name=name,
             mime="audio/mpeg"
         )
+
 
 
