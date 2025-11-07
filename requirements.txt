@@ -1,22 +1,10 @@
-# Streamlit and UI
 streamlit==1.51.0
-rich==14.2.0
-markdown-it-py==4.0.0
-mdurl==0.1.2
-pygments==2.19.2
-
-# Data & computation
-numpy>=1.26.0,<2.4.0
+numpy==2.3.4
 pandas==2.3.3
-scipy==1.16.3
-
-# Audio processing
 pydub==0.25.1
 noisereduce==3.0.3
+scipy==1.16.3
 soundfile==0.13.1
-
-# Misc
 requests==2.32.5
-tqdm==4.67.1
-click==8.3.0
+matplotlib==3.10.7
 joblib==1.5.2
