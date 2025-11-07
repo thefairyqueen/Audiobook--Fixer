@@ -5,3 +5,14 @@ librosa==0.8.1
 soundfile==0.10.3.post1
 pydub==0.25.1
 noisereduce==2.0.0
+altair==4.2.2
+scikit-learn==1.6.1
+matplotlib==3.8.4
+pandas==2.3.3
+numba==0.62.1
+joblib==1.5.2
+pooch==1.8.2
+cffi==2.0.0
+requests==2.32.5
+rich==14.2.0
+tqdm==4.67.1
