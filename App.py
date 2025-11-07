@@ -104,6 +104,11 @@ if uploaded_files:
             tmp_preview = io.BytesIO()
             preview_segment.export(tmp_preview, format="mp3", bitrate="192k")
             tmp_preview.seek(0)
+            if __name__ == "__main__":
+    import os
+    import streamlit as st
+    os.system("streamlit run app.py")
+
 
             # Display preview audio player
             st.audio(tmp_preview, format="audio/mp3", start_time=0, caption=f"Preview: {file.name}")
@@ -117,3 +122,4 @@ if uploaded_files:
         st.download_button(
             label=f"⬇️ Download {name}",
             data=audio_data,
+
